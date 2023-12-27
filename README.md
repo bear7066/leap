@@ -2,9 +2,9 @@
 
 ## Setting up environment
 1. Download ultraleap as the link below
-2. Start up Ultraleap-Tracking-WS.exe in windows_websocket first and dont turn it down
-when it works, it should have below message:
+2. Start up Ultraleap-Tracking-WS.exe in windows_websocket first and don't turn it down.
 ![d](windows_websocket/socket_run.png)
+(when it works, it should have above message)
 
 3. Use part4 to test if the device is working.
 4. Start to develop base on part1/2/3 or by yourself.
