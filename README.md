@@ -14,8 +14,8 @@
 2. Build a program with basic controls. (In progress)
 3. Add control function to final presentation.
 
-(Gemini)[https://leap2.ultraleap.com/gemini-downloads/]
+[Gemini](https://leap2.ultraleap.com/gemini-downloads/)
 
-(our_ppt)[https://www.canva.com/design/DAF2FjIwo4c/ro0M585jEhGs9ekdUYk3eA/edit]
+[our_ppt](https://www.canva.com/design/DAF2FjIwo4c/ro0M585jEhGs9ekdUYk3eA/edit)
 
-(original_github)[https://github.com/gmarzloff/leap-tracer/tree/master]
+[original_github](https://github.com/gmarzloff/leap-tracer/tree/master)
