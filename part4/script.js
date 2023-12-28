@@ -53,27 +53,33 @@
 // });
 
 
-// test 3: find that interactionBox is unavailable
-var controller = new Leap.Controller();
+// // test 3: find that interactionBox is unavailable
+// var controller = new Leap.Controller();
 
-controller.on("frame", function(frame) {
-    var output = document.getElementById('output');
+// controller.on("frame", function(frame) {
+//     var output = document.getElementById('output');
 
-    if(frame.hands.length > 0) {
-        var hand = frame.hands[0];
-        var interactionBox = frame.interactionBox;
+//     if(frame.hands.length > 0) {
+//         var hand = frame.hands[0];
+//         var interactionBox = frame.interactionBox;
 
-        if(interactionBox){
-            output.innerHTML = 'Interaction box available';
-        } else {
-            output.innerHTML = 'Interaction box available';
-        }
+//         if(interactionBox){
+//             output.innerHTML = 'Interaction box available';
+//         } else {
+//             output.innerHTML = 'Interaction box available';
+//         }
 
-        output.innerHTML = 'Hand detected. Palm position: ' 
-                           + hand.palmPosition.join(', ');
-    } else {
-        output.innerHTML = 'Waiting for hand detection...';
-    }
+//         output.innerHTML = 'Hand detected. Palm position: ' 
+//                            + hand.palmPosition.join(', ');
+//     } else {
+//         output.innerHTML = 'Waiting for hand detection...';
+//     }
+// });
+
+// controller.connect();
+
+Leap.loop(function(frame){
+    output.innerHTML = frame.hands.length;
+
+    console.log(frame.hands.length);
 });
-
-controller.connect();
