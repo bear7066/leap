@@ -14,8 +14,13 @@
 2. Build a program with basic controls. (In progress)
 3. Add control function to final presentation.
 
-[Gemini](https://leap2.ultraleap.com/gemini-downloads/)
+## Problems
+![c](windows_websocket/尚未解決.png) 
+
+[gemini](https://leap2.ultraleap.com/gemini-downloads/)
 
 [our_ppt](https://www.canva.com/design/DAF2FjIwo4c/ro0M585jEhGs9ekdUYk3eA/edit)
+
+[medium_document](https://medium.com/physiatry/build-a-web-app-to-test-fine-motor-coordination-with-leap-motion-part-3-programming-tutorial-ec1e1333b0d3)
 
 [original_github](https://github.com/gmarzloff/leap-tracer/tree/master)
