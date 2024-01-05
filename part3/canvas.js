@@ -63,18 +63,19 @@ $(document).ready(function() {
     });
 
     // DRAW RESET BUTTON
-    $('canvas').drawRect({
+    $('canvas').drawArc({
         fillStyle: '#f00', // Red
         x: 60,
         y: 350,
-        width: 50,
-        height: 40,
+        //width: 50,
+        //height: 40,
+        radius: 30,
         layer: true,
         name: 'resetButton',
-        cornerRadius: 10,
-        click: function() {
-            resetPath();
-        }
+        //cornerRadius: 10,
+        //click: function() {
+        //    resetPath();
+        //}
     });
 
     // DRAW TEXT ON RESET BUTTON
@@ -134,16 +135,23 @@ $(document).ready(function() {
     // SETUP AND OBTAIN DATA FROM LEAP MOTION
     Leap.loop({}, function(frame) {
         if (frame.pointables.length > 0) {
+
             var pointable = frame.pointables[0];
             var interactionBox = frame.interactionBox;
-            var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
+            //var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
 
             var pointerOnCanvas = {
-                x: $('canvas').width() * normalizedPosition[0],
-                y: $('canvas').height() * (1 - normalizedPosition[1])
-            };
+                x: (pointable.tipPosition[0]+200) * 2,  //$('canvas').width()*normalizedPosition[0],
+                y: (pointable.tipPosition[2]+100) * 2 //$('canvas').height()*(1 - normalizedPosition[1])
+            };                
 
             var leapCursorLayer = $('canvas').getLayer('leapCursor');
+            var hand = frame.hands[0];
+            if ( collisionTest(leapCursorLayer, $('canvas').getLayer('resetButton')) ) {
+                if (hand.grabStrength === 1.0) {
+                    resetPath();
+                  }
+            }
 
             // Check for fingertip movement and collision with startCircle
             if (((Math.round(pointerOnCanvas.x) != Math.round(leapCursorLayer.x)) ||
