@@ -207,7 +207,7 @@ $(document).ready(function() {
                 if (!saveButtonLayer.hoverStartTime) {
                     saveButtonLayer.hoverStartTime = new Date().getTime();
                 } else if (new Date().getTime() - saveButtonLayer.hoverStartTime > 2000) {
-                    saveCanvas(); // Call the save function
+                    saveCanvas(800, 300); // Call the save function
                     saveButtonLayer.hoverStartTime = null; // Reset the timer
                 }
             } else {
@@ -288,48 +288,6 @@ $(document).ready(function() {
         pathSet[pathSet.length-1]['y' + i] = pathPoints[i+before_pathPoints - 1][1];
     }
 
-    function saveCanvas() {
-        // Create a temporary canvas element
-        var tempCanvas = document.createElement('canvas');
-        var tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = $('canvas').width();
-        tempCanvas.height = $('canvas').height();
-    
-        // Draw only the user's drawing (pathSet) onto the temporary canvas
-        pathSet.forEach(function(pathLayer) {
-            // Check if the layer is a line type
-            if (pathLayer.type === 'line') {
-                tempCtx.beginPath();
-                tempCtx.strokeStyle = pathLayer.strokeStyle;
-                tempCtx.lineWidth = pathLayer.strokeWidth;
-    
-                // Iterate over the points in the path
-                var firstPoint = true;
-                for (var prop in pathLayer) {
-                    if (prop.startsWith('x') && pathLayer.hasOwnProperty(prop)) {
-                        var x = pathLayer[prop];
-                        var y = pathLayer['y' + prop.substring(1)];
-                        if (firstPoint) {
-                            tempCtx.moveTo(x, y);
-                            firstPoint = false;
-                        } else {
-                            tempCtx.lineTo(x, y);
-                        }
-                    }
-                }
-                tempCtx.stroke();
-            }
-        });
-    
-        // Export the temporary canvas as an image
-        var image = tempCanvas.toDataURL('image/png');
-        var link = document.createElement('a');
-        link.download = 'my-painting.png';
-        link.href = image;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
     
     
     
@@ -339,12 +297,5 @@ $(document).ready(function() {
         // 例如，可以將相應顏色的圖層設置為可見
         $('canvas').setLayer(layerName, { visible: true }).drawLayers();
     }
-    // function showColorPalette() {
-    //     // Logic to show color palette
-    //     // You can set the 'visible' property of color layers to true
-    //     ['blueCircle', 'redCircle', 'yellowCircle', 'greenCircle', 'blackCircle', 'eraserButton'].forEach(function(layerName) {
-    //         $('canvas').setLayer(layerName, { visible: true }).drawLayers();
-    //     });
-    // }
 
 }); 
