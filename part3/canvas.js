@@ -1,93 +1,105 @@
-// canvas.js
-// This javascript is used to manage the cursor tracer canvas
-// Developed by George Marzloff (george@marzloffmedia.com)
 
 $(document).ready(function() {
-    var spiral = new Spiral({ // Create a Spiral object
-        startPoint: { x: 400, y: 210 }, // See Spiral() object in spiral.js
-        numberOfLoops: 3.15,
-        radiusGrowthRate: 0.15,
-    });
 
-    var hoverTargetsRadius = 15;
     var pathPoints = []; // Stores the path of the mouse
-    var isTracking = false; // Flag to turn on/off tracking
+    var pathSet = [];  // stores the userPath(s)
+    //var isTracking = false; // Flag to turn on/off tracking
+    var isPainting = false;
     var radiusPlotForAnalysis = []; // Array to store the sample #, radius plot for analysis
+    var colorRadius = 30;
+    var before_pathPoints = 0;
 
-    addUserPathLayer(); // Setup an empty layer for userPath
+    var image = new Image();
+    image.src = 'pen.png'; // Replace with your image path
+    image.onload = function() {
+        // Draw the image onto the canvas when it's loaded
+        $('canvas').drawImage({
+            source: image,
+            x: 100, y: 100, // Coordinates where you want to place the image
+            width: 30, height: 30, // Size of the image
+            layer: true,
+            name: 'imageOnCircle'
+    }); 
+    }
 
-    // CREATE LAYER FOR SPIRAL GUIDELINE
-    $('canvas').drawLine({
-        strokeWidth: 3,
-        strokeStyle: '#aaa', // Gray
-        visible: true,
-        name: 'guideline',
-        layer: true
-    });
-
-    // ADD THE SPIRAL GUIDELINE POINTS TO THE LAYER AND DRAW IT
-    $('canvas').setLayer('guideline', spiral.guidelinePoints).drawLayers();
-
-    // Draw the starting circle on the canvas
-    $('canvas').drawArc({
-        fillStyle: '#0a0', // Green
-        opacity: 0.75,
-        x: spiral.startPoint.x,
-        y: spiral.startPoint.y,
-        radius: hoverTargetsRadius,
-        layer: true,
-        name: 'startCircle'
-    });
-
-    // DRAW THE TARGET CIRCLE
+    // DRAW THE COLOR CIRCLE
     $('canvas').drawArc({
         fillStyle: '#00d', // Blue
-        opacity: 0.75,
-        x: spiral.endPoint.x,
-        y: spiral.endPoint.y,
-        radius: hoverTargetsRadius,
+        opacity: 1.0,
+        x: 35,
+        y: 35,
+        radius: colorRadius,
         layer: true,
-        name: 'targetCircle'
+        name: 'blueCircle'
     });
 
-    // DRAW INSTRUCTIONS TEXT
-    $('canvas').drawText({
-        fillStyle: '#000',
-        x: 400,
-        y: 20,
-        fontSize: 14,
-        fontFamily: 'Verdana, sans-serif',
-        text: 'Mouseover the green circle and trace the spiral to the blue circle.',
-        layer: true,
-        name: 'instructionsText'
-    });
-
-    // DRAW RESET BUTTON
     $('canvas').drawArc({
         fillStyle: '#f00', // Red
-        x: 60,
-        y: 350,
-        //width: 50,
-        //height: 40,
-        radius: 30,
+        opacity: 1.0,
+        x: 35,
+        y: 105,
+        radius: colorRadius,
         layer: true,
-        name: 'resetButton',
-        //cornerRadius: 10,
-        //click: function() {
-        //    resetPath();
-        //}
+        name: 'redCircle'
     });
 
-    // DRAW TEXT ON RESET BUTTON
-    $('canvas').drawText({
+    $('canvas').drawArc({
+        fillStyle: '#ffd400', // Yellow
+        opacity: 1.0,
+        x: 35,
+        y: 175,
+        radius: colorRadius,
+        layer: true,
+        name: 'yellowCircle'
+    });
+
+    $('canvas').drawArc({
+        fillStyle: '#7fb80e', // Green
+        opacity: 1.0,
+        x: 35,
+        y: 245,
+        radius: colorRadius,
+        layer: true,
+        name: 'greenCircle'
+    });
+
+    $('canvas').drawArc({
+        fillStyle: 'fff', // Black
+        opacity: 1.0,
+        x: 35,
+        y: 315,
+        radius: colorRadius,
+        layer: true,
+        name: 'blackCircle'
+    });
+
+    // DRAW THE ERASER BOTTON
+    $('canvas').drawArc({
         fillStyle: '#fff', // White
-        x: $('canvas').getLayer('resetButton').x,
-        y: $('canvas').getLayer('resetButton').y,
+        strokeStyle: 'black', // Border color
+        strokeWidth: 2, // Border width
+        opacity: 1.0,
+        x: 35,
+        y: 385,
+        radius: colorRadius,
+        layer: true,
+        name: 'eraserButton'
+    });
+
+    var colors = [$('canvas').getLayer('blueCircle'),$('canvas').getLayer('redCircle'),
+        $('canvas').getLayer('yellowCircle'),$('canvas').getLayer('greenCircle'),
+        $('canvas').getLayer('blackCircle'),$('canvas').getLayer('eraserButton')];
+
+    // DRAW TEXT ON ERASER BUTTON
+    $('canvas').drawText({
+        fillStyle: '000', // Black
+        x: 35,
+        y: 385,
         width: 50,
         height: 40,
-        text: 'Reset',
+        text: 'Eraser',
         layer: true,
-        name: 'resetText',
+        name: 'eraserText',
         intangible: true
     });
 
@@ -95,7 +107,7 @@ $(document).ready(function() {
     $('canvas').drawText({
         fillStyle: '#000', // Black
         x: 100,
-        y: 20,
+        y: 590,
         fontSize: 14,
         fontFamily: 'Verdana, sans-serif',
         text: "Leap",
@@ -106,24 +118,61 @@ $(document).ready(function() {
     // CREATE A PURPLE CIRCLE LAYER TO SEE THE FINGER POSITION
     $('canvas').drawArc({
         fillStyle: '#c0f', // Purple
+        strokeStyle: 'black', // Border color
+        strokeWidth: 2, // Border width
         radius: 10,
         layer: true,
         name: 'leapCursor',
         visible: false,
     });
 
+    // 小鉛筆
+    $('canvas').drawRect({
+        fillStyle: '#0d6efd', // Gray color for pencil button
+        x: 100, y: 100, // Adjust position as needed
+        radius:10,
+        cornerRadius: 10,
+        width: 50, height: 50,
+        layer: true,
+        name: 'pencilButton'
+    });
+
+    // 存檔鍵
+    // Draw the save button on the canvas
+    // Draw the save button as a circle on the canvas
+    $('canvas').drawArc({
+        fillStyle: '#0d6efd', // Blue color
+        x: 35, y: 450, // Adjust position as needed
+        radius: 30, // Radius of the circle
+        layer: true,
+        name: 'saveButton'
+    });
+
+    $('canvas').drawText({
+        fillStyle: '#fff', // White text
+        x: 35, y: 450,
+        fontSize: 15,
+        fontFamily: 'Verdana, sans-serif',
+        text: 'Save',
+        layer: true,
+        name: 'saveButtonText',
+        intangible: true
+    });
+    
     function addUserPathLayer() {
         $('canvas').addLayer({
-            name: 'userPath',
+            name: `userPath${pathSet.length}`,
             type: 'line',
-            strokeStyle: '#f00', // Red
+            strokeStyle: '#ddd', // set init color 'White'
             strokeWidth: 3,
-            index: 4
+            index: pathSet.length,
         });
     }
 
+
     function resetPath() {
-        pathPoints = [];
+        //pathPoints = [];
+        pathSet = [];
         radiusPlotForAnalysis = [];
         isTracking = false;
         $('canvas').removeLayer('userPath');
@@ -131,56 +180,83 @@ $(document).ready(function() {
         addUserPathLayer();
         $('canvas').drawLayers();
     }
+    var hoverTimers = {};
 
     // SETUP AND OBTAIN DATA FROM LEAP MOTION
     Leap.loop({}, function(frame) {
         if (frame.pointables.length > 0) {
 
-            var pointable = frame.pointables[0];
-            var interactionBox = frame.interactionBox;
-            //var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
-
-            var pointerOnCanvas = {
-                x: (pointable.tipPosition[0]+200) * 2,  //$('canvas').width()*normalizedPosition[0],
-                y: (pointable.tipPosition[2]+100) * 2 //$('canvas').height()*(1 - normalizedPosition[1])
-            };                
-
             var leapCursorLayer = $('canvas').getLayer('leapCursor');
-            var hand = frame.hands[0];
-            if ( collisionTest(leapCursorLayer, $('canvas').getLayer('resetButton')) ) {
-                if (hand.grabStrength === 1.0) {
-                    resetPath();
-                  }
-            }
+            var saveButtonLayer = $('canvas').getLayer('saveButton');
+            // var pencilButtonLayer = $('canvas').getLayer('pencilButton');
 
-            // Check for fingertip movement and collision with startCircle
-            if (((Math.round(pointerOnCanvas.x) != Math.round(leapCursorLayer.x)) ||
-                    (Math.round(pointerOnCanvas.y) != Math.round(leapCursorLayer.y))) &&
-                isTracking == false) {
-
-                isTracking = collisionTest(leapCursorLayer, $('canvas').getLayer('startCircle'));
-            } else if (isTracking == true && collisionTest(leapCursorLayer, $('canvas').getLayer('targetCircle')) == true) {
-                isTracking = false;
-                var analysis = new Analysis(radiusPlotForAnalysis);
-                analysis.printResults();
-            }
-
-            $('canvas').setLayer('leapxy', { text: '(' + pointerOnCanvas.x.toFixed() + ', ' + pointerOnCanvas.y.toFixed() + ')' });
-            leapCursorLayer.x = pointerOnCanvas.x;
-            leapCursorLayer.y = pointerOnCanvas.y;
             leapCursorLayer.visible = true;
 
-            if (isTracking == true) {
-                pathPoints.push([pointerOnCanvas.x, pointerOnCanvas.y]);
-                var i = pathPoints.length;
-                var pathLayer = $('canvas').getLayer('userPath');
-                pathLayer['x' + i] = pathPoints[i - 1][0];
-                pathLayer['y' + i] = pathPoints[i - 1][1];
-                radiusPlotForAnalysis.push({
-                    x: pathPoints[i - 1][0] - spiral.startPoint.x,
-                    y: pathPoints[i - 1][1] - spiral.startPoint.y
-                });
+            //拇指的位置
+            var pointerOnCanvas = {
+                x: (frame.pointables[0].tipPosition[0]+200) * 2,  //$('canvas').width()*normalizedPosition[0],
+                y: (frame.pointables[0].tipPosition[2]+100) * 2 //$('canvas').height()*(1 - normalizedPosition[1])
+            };                
+
+            var hand = frame.hands[0];
+            
+            pointerColor(hand);  //  在調色盤上握拳 -> pointer變成該顏色
+
+            // 存檔判斷
+            if (collisionTest(leapCursorLayer, saveButtonLayer)) {
+                if (!saveButtonLayer.hoverStartTime) {
+                    saveButtonLayer.hoverStartTime = new Date().getTime();
+                } else if (new Date().getTime() - saveButtonLayer.hoverStartTime > 2000) {
+                    saveCanvas(); // Call the save function
+                    saveButtonLayer.hoverStartTime = null; // Reset the timer
+                }
+            } else {
+                saveButtonLayer.hoverStartTime = null;
             }
+            // 兩秒調色盤
+            colors.forEach(function(colorLayer) {
+                if (collisionTest(leapCursorLayer, colorLayer)) {
+                    // 如果指標與顏色圖層碰撞，則啟動計時器
+                    if (!hoverTimers[colorLayer.name]) {
+                        hoverTimers[colorLayer.name] = setTimeout(function() {
+                            showColorOptions(colorLayer.name); // 顯示顏色選項的函數
+                        }, 1000); // 設置計時器為1秒
+                    }
+                } else {
+                    // 如果指標離開顏色圖層，則清除計時器
+                    if (hoverTimers[colorLayer.name]) {
+                        clearTimeout(hoverTimers[colorLayer.name]);
+                        delete hoverTimers[colorLayer.name];
+                    }
+                }
+            });
+
+            //  握拳 -> 畫畫
+            if (hand.grabStrength === 1.0){
+                if(isPainting == false){
+                    isPainting = true;
+                    addUserPathLayer();
+                    pathSet.push($('canvas').getLayer(`userPath${pathSet.length}`));
+                }
+                paint(pathPoints, pointerOnCanvas, before_pathPoints);
+            }else if (isPainting == true) {
+                before_pathPoints = pathPoints.length;
+                isPainting = false;
+            }
+            
+
+            $('canvas').setLayer('leapxy', { text: '(' + pointerOnCanvas.x.toFixed() + ', ' + pointerOnCanvas.y.toFixed() + ')' });
+            leapCursorLayer.x = pointerOnCanvas.x; // 若後面沒用到leapCursorLayer.x就刪掉這行
+            leapCursorLayer.y = pointerOnCanvas.y; // 若後面沒用到leapCursorLayer.y就刪掉這行
+            
+
+             /*if (isPainting == true) {
+                pathPoints.push([pointerOnCanvas.x, pointerOnCanvas.y]);
+                var len = pathPoints.length;
+                var pathLayer = $('canvas').getLayer('userPath');
+                pathLayer['x' + len] = pathPoints[len - 1][0];
+                pathLayer['y' + len] = pathPoints[len - 1][1];
+            }*/
 
             $('canvas').drawLayers();
         } else {
@@ -196,4 +272,79 @@ $(document).ready(function() {
         var vectorMagnitude = Math.sqrt(diffInX * diffInX + diffInY * diffInY);
         return vectorMagnitude < sumOfRadii;
     }
-});
+
+    function pointerColor(hand){
+        for ( var i=0 ; i<colors.length ; ++i ){
+            if (hand.grabStrength === 1.0 && collisionTest($('canvas').getLayer('leapCursor'),colors[i]))
+                    $('canvas').getLayer('leapCursor').fillStyle = colors[i].fillStyle;
+        }
+    }
+
+    function paint(pathPoints,pointerOnCanvas,before_pathPoints){
+        pathPoints.push([pointerOnCanvas.x, pointerOnCanvas.y]);
+        var i = pathPoints.length - before_pathPoints;
+        pathSet[pathSet.length-1].strokeStyle = $('canvas').getLayer('leapCursor').fillStyle;
+        pathSet[pathSet.length-1]['x' + i] = pathPoints[i+before_pathPoints - 1][0];
+        pathSet[pathSet.length-1]['y' + i] = pathPoints[i+before_pathPoints - 1][1];
+    }
+
+    function saveCanvas() {
+        // Create a temporary canvas element
+        var tempCanvas = document.createElement('canvas');
+        var tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = $('canvas').width();
+        tempCanvas.height = $('canvas').height();
+    
+        // Draw only the user's drawing (pathSet) onto the temporary canvas
+        pathSet.forEach(function(pathLayer) {
+            // Check if the layer is a line type
+            if (pathLayer.type === 'line') {
+                tempCtx.beginPath();
+                tempCtx.strokeStyle = pathLayer.strokeStyle;
+                tempCtx.lineWidth = pathLayer.strokeWidth;
+    
+                // Iterate over the points in the path
+                var firstPoint = true;
+                for (var prop in pathLayer) {
+                    if (prop.startsWith('x') && pathLayer.hasOwnProperty(prop)) {
+                        var x = pathLayer[prop];
+                        var y = pathLayer['y' + prop.substring(1)];
+                        if (firstPoint) {
+                            tempCtx.moveTo(x, y);
+                            firstPoint = false;
+                        } else {
+                            tempCtx.lineTo(x, y);
+                        }
+                    }
+                }
+                tempCtx.stroke();
+            }
+        });
+    
+        // Export the temporary canvas as an image
+        var image = tempCanvas.toDataURL('image/png');
+        var link = document.createElement('a');
+        link.download = 'my-painting.png';
+        link.href = image;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    
+    
+    // 調色盤
+    function showColorOptions(layerName) {
+        // 根據 layerName 顯示相應的顏色選項
+        // 例如，可以將相應顏色的圖層設置為可見
+        $('canvas').setLayer(layerName, { visible: true }).drawLayers();
+    }
+    // function showColorPalette() {
+    //     // Logic to show color palette
+    //     // You can set the 'visible' property of color layers to true
+    //     ['blueCircle', 'redCircle', 'yellowCircle', 'greenCircle', 'blackCircle', 'eraserButton'].forEach(function(layerName) {
+    //         $('canvas').setLayer(layerName, { visible: true }).drawLayers();
+    //     });
+    // }
+
+}); 

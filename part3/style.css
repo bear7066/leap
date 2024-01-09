@@ -4,6 +4,10 @@ body{
 	font-family: Arial, Verdana;
 }
 
+save{
+	margin: 1050px;
+}
+
 /* add this style to _all_ h1 elements */
 h1 {
 	text-align: center;
